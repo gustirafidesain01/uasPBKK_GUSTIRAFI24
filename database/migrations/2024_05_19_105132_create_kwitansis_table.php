@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kwitansis', function (Blueprint $table) {
+        Schema::create('kwitansi', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('sewa_id');
-            $table->foreign('sewa_id')->references('id')->on('sewas')->onDelete('cascade');
-            $table->date('tanggal_pembayaran');
-            $table->double('jumlah_pembayaran', 10, 2);
-            // Tambahkan kolom lain yang sesuai dengan kebutuhan
+            $table->string('nomor_kwitansi')->unique();
+            $table->date('tanggal');
+            $table->decimal('jumlah', 15, 2);
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kwitansis');
+        Schema::dropIfExists('kwitansi');
     }
 };

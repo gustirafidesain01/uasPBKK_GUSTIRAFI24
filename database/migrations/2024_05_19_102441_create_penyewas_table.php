@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('penyewas', function (Blueprint $table) {
+        Schema::create('penyewa', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('invoice_id');
-            $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
-            $table->string('nama');
-            $table->string('alamat');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('nama_penyewa');
+            $table->enum('jenis_kelamin', ['L', 'P']);
+            $table->text('alamat_penyewa');
+            $table->unsignedBigInteger('kwitansi_id');
+            $table->foreign('kwitansi_id')->references('id')->on('kwitansi')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('penyewas');
+        Schema::dropIfExists('penyewa');
     }
 };

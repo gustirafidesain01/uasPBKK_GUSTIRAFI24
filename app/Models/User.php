@@ -17,9 +17,10 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'username',
         'email',
         'password',
+        'level',
     ];
 
     /**
@@ -33,15 +34,27 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    /**
+     * Relationship with Invoice.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function dataTambahanInvoice()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(Invoice::class, 'user_id')->orderBy('nidn', 'asc');
+    }
+    
+    // relationship
+    public function dataTambahanPenyewa(){
+        return $this->hasOne(Penyewa::class,'user_id')->orderBy('nim','asc');
     }
 }

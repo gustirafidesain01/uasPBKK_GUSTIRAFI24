@@ -20,10 +20,7 @@ class Invoice extends Model
         return $this->belongsTo(Penyewa::class, 'id_penyewa');
     }
 
-    public function sewa()
-    {
-        return $this->belongsTo(Sewa::class, 'id_sewa');
-    }
+ 
 
     public function kwitansi()
     {

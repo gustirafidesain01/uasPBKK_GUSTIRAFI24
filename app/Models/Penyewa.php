@@ -7,14 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Penyewa extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'invoice_id',
-        'nama',
-        'alamat',
+        'user_id', 
+        'nama_penyewa', 
+        'jenis_kelamin', 
+        'alamat_penyewa', 
+        'kwitansi_id'
     ];
 
-    public function invoice()
+    public function user()
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->belongsTo(User::class);
+    }
+
+    public function kwitansi()
+    {
+        return $this->belongsTo(Kwitansi::class, 'kwitansi_id');
     }
 }

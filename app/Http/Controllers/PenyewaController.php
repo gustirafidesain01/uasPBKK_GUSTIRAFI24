@@ -2,58 +2,98 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Kwitansi;
 use App\Models\Penyewa;
 use Illuminate\Http\Request;
 
 class PenyewaController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $penyewas = Penyewa::all();
-        return view('penyewas.index', compact('penyewas'));
+        $penyewa = Penyewa::latest()->paginate(10);
+        return view('penyewas.index',compact('penyewas'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        return view('penyewas.create');
+        $user = User::where('level', 'penyewas')->get();
+        $kwitansi = Kwitansi::all();
+        return view('penyewas.create', compact('user', 'kwitansi'));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        Penyewa::create($request->validate([
-            'invoice_id' => 'required',
-            'nama' => 'required',
-            'alamat' => 'required',
-        ]));
+        $request->validate([
+            'nama_penyewa'      => 'required|min:5',
+            'jenis_kelamin'     => 'required',
+            'alamat_penyewa'    => 'required',
+            'kwitansi_id'       => 'required|unique:penyewas,kwitansi_id'
+        ]);
 
-        return redirect()->route('penyewas.index')->with('success', 'Penyewa created successfully.');
+        Penyewa::create([
+            'user_id'          => $request->user_id,
+            'nama_penyewa'     => $request->nama_penyewa, 
+            'jenis_kelamin'    => $request->jenis_kelamin,
+            'alamat_penyewa'   => $request->alamat_penyewa,
+            'kwitansi_id'      => $request->kwitansi_id,
+        ]);
+       
+        return redirect()->route('penyewa.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
-    public function show(Penyewa $penyewa)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
     {
-        return view('penyewas.show', compact('penyewa'));
+        $penyewa = Penyewa::findOrFail($id);
+        $user = User::where('level', 'penyewa')->get();
+        $kwitansi = Kwitansi::all();
+
+        return view('penyewa.edit', compact('penyewa', 'user', 'kwitansi'));
     }
 
-    public function edit(Penyewa $penyewa)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
     {
-        return view('penyewas.edit', compact('penyewa'));
+        $request->validate([
+            'nama_penyewa'      => 'required|min:5',
+            'jenis_kelamin'     => 'required',
+            'alamat_penyewa'    => 'required',
+            'kwitansi_id'       => 'required|unique:penyewas,kwitansi_id,' . $id
+        ]);
+
+        $penyewa = Penyewa::findOrFail($id);
+        $penyewa->update([
+            'user_id'          => $request->user_id,
+            'nama_penyewa'     => $request->nama_penyewa, 
+            'jenis_kelamin'    => $request->jenis_kelamin,
+            'alamat_penyewa'   => $request->alamat_penyewa,
+            'kwitansi_id'      => $request->kwitansi_id,
+        ]);
+       
+        return redirect()->route('penyewa.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
-    public function update(Request $request, Penyewa $penyewa)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
     {
-        $penyewa->update($request->validate([
-            'invoice_id' => 'required',
-            'nama' => 'required',
-            'alamat' => 'required',
-        ]));
-
-        return redirect()->route('penyewas.index')->with('success', 'Penyewa updated successfully.');
-    }
-
-    public function destroy(Penyewa $penyewa)
-    {
+        $penyewa = Penyewa::findOrFail($id);
         $penyewa->delete();
-
-        return redirect()->route('penyewas.index')->with('success', 'Penyewa deleted successfully.');
+        return redirect()->route('penyewa.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 }

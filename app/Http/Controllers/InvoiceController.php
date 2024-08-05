@@ -2,62 +2,80 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Invoice;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 
 class InvoiceController extends Controller
 {
-    public function index()
+    
+    public function index(): View
     {
-        $invoices = Invoice::all();
+        $invoices = Invoice::latest()->paginate(10);
         return view('invoices.index', compact('invoices'));
     }
 
-    public function create()
+    public function create(): View
     {
-        return view('invoices.create');
+        $users = User::where('level', 'invoices')->get();
+        return view('invoices.create', compact('users'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'id_penyewa' => 'required|exists:penyewas,id',
-            'id_sewa' => 'required|exists:sewas,id',
-            'id_kwitansi' => 'required|exists:kwitansis,id',
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'amount'  => 'required|numeric',
+            'status'  => 'required|string',
         ]);
 
-        Invoice::create($validatedData);
+        Invoice::create([
+            'user_id' => $request->user_id,
+            'amount'  => $request->amount,
+            'status'  => $request->status,
+        ]);
 
-        return redirect()->route('invoices.index')->with('success', 'Invoice created successfully.');
+        return redirect()->route('invoices.index')->with(['success' => 'Invoice Created Successfully!']);
     }
 
-    public function show(Invoice $invoice)
+    public function show(string $id): View
     {
+        $invoice = Invoice::findOrFail($id);
         return view('invoices.show', compact('invoice'));
     }
 
-    public function edit(Invoice $invoice)
+    public function edit(string $id): View
     {
-        return view('invoices.edit', compact('invoice'));
+        $invoice = Invoice::findOrFail($id);
+        $users = User::where('level', 'invoices')->get();
+        return view('invoices.edit', compact('invoice', 'users'));
     }
 
-    public function update(Request $request, Invoice $invoice)
+    public function update(Request $request, string $id): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'id_penyewa' => 'required|exists:penyewas,id',
-            'id_sewa' => 'required|exists:sewas,id',
-            'id_kwitansi' => 'required|exists:kwitansis,id',
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'amount'  => 'required|numeric',
+            'status'  => 'required|string',
         ]);
 
-        $invoice->update($validatedData);
+        $invoice = Invoice::findOrFail($id);
+        $invoice->update([
+            'user_id' => $request->user_id,
+            'amount'  => $request->amount,
+            'status'  => $request->status,
+        ]);
 
-        return redirect()->route('invoices.index')->with('success', 'Invoice updated successfully.');
+        return redirect()->route('invoices.index')->with(['success' => 'Invoice Updated Successfully!']);
     }
 
-    public function destroy(Invoice $invoice)
+    public function destroy(string $id): RedirectResponse
     {
+        $invoice = Invoice::findOrFail($id);
         $invoice->delete();
 
-        return redirect()->route('invoices.index')->with('success', 'Invoice deleted successfully.');
+        return redirect()->route('invoices.index')->with(['success' => 'Invoice Deleted Successfully!']);
     }
 }
